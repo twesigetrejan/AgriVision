@@ -6,18 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { User } from 'lucide-react-native';
 
+// Type for Post
 interface Post {
   id: string;
   userName: string;
   userProfileImage: string;
   postContent: string;
-  imageUrl?: string;
+  imageUrl?: string | number;
   likes: number;
   comments: number;
   source?: string;
 }
-
-const IndexPage: React.FC = () => {
+const PostPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<{ [key: string]: boolean }>({});
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
@@ -45,7 +45,7 @@ const IndexPage: React.FC = () => {
 
       if (loggedIn === 'true') {
         const username = await AsyncStorage.getItem('loggedInUser');
-        const userProfileImage = await AsyncStorage.getItem(`${username}_profileImage`); // Fetch the profile image URL
+        const userProfileImage = await AsyncStorage.getItem(`${username}_profileImage`);
         setLoggedInUser(username);
         setProfileImage(userProfileImage);
       }
@@ -68,9 +68,9 @@ const IndexPage: React.FC = () => {
       prevPosts.map(post =>
         post.id === postId
           ? {
-              ...post,
-              likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1
-            }
+            ...post,
+            likes: likedPosts[postId] ? post.likes - 1 : post.likes + 1
+          }
           : post
       )
     );
@@ -112,12 +112,13 @@ const IndexPage: React.FC = () => {
     const newPost: Post = {
       id: (posts.length + 1).toString(),
       userName: loggedInUser,
-      userProfileImage: profileImage || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541', // Default profile image if not available
+      userProfileImage: profileImage || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
       postContent: newPostContent,
       imageUrl: selectedImage || undefined,
       likes: 0,
       comments: 0,
     };
+
     const updatedPosts = [newPost, ...posts];
     setPosts(updatedPosts);
     setNewPostContent('');
@@ -129,7 +130,7 @@ const IndexPage: React.FC = () => {
     if (isLoggedIn) {
       await AsyncStorage.removeItem('loggedIn');
       await AsyncStorage.removeItem('loggedInUser');
-      await AsyncStorage.removeItem(`${loggedInUser}_profileImage`); // Remove profile image URL on logout
+      await AsyncStorage.removeItem(`${loggedInUser}_profileImage`);
       setIsLoggedIn(false);
       setLoggedInUser(null);
       setProfileImage(null);
@@ -139,41 +140,50 @@ const IndexPage: React.FC = () => {
     }
   };
 
-  const renderPost: ListRenderItem<Post> = ({ item }) => (
-    <View style={styles.postCard}>
-      <View style={styles.postHeader}>
-        <Image source={{ uri: item.userProfileImage }} style={styles.profileImage} />
-        <Text style={styles.userName}>{item.userName}</Text>
+  const renderPost: ListRenderItem<Post> = ({ item }) => {
+    const renderImage = () => {
+      if (item.imageUrl) {
+        if (typeof item.imageUrl === 'string' && item.imageUrl.startsWith('http')) {
+          return <Image source={{ uri: item.imageUrl }} style={styles.postImage} />;
+        } else if (typeof item.imageUrl === 'number') {
+          return <Image source={item.imageUrl} style={styles.postImage} />;
+        }
+      }
+      return null;
+    };
+
+    return (
+      <View style={styles.postCard}>
+        <View style={styles.postHeader}>
+          <Image source={{ uri: item.userProfileImage }} style={styles.profileImage} />
+          <Text style={styles.userName}>{item.userName}</Text>
+        </View>
+        {renderImage()}
+        {item.source && (
+          <Text style={styles.sourceText}>Source: {item.source}</Text>
+        )}
+        <Text style={styles.postContent}>{item.postContent}</Text>
+        <View style={styles.interactionContainer}>
+          <TouchableOpacity
+            style={[
+              styles.interactionButton,
+              likedPosts[item.id] ? styles.likedButton : null
+            ]}
+            onPress={() => toggleLike(item.id)}
+          >
+            <Icon name="heart" size={18} color={likedPosts[item.id] ? "#FFFFFF" : "#4CAF50"} />
+            <Text style={[styles.buttonText, { color: likedPosts[item.id] ? "#FFFFFF" : "#4CAF50" }]}>
+              {item.likes}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.interactionButton}>
+            <Icon name="message-square" size={18} color="#4CAF50" />
+            <Text style={styles.buttonText}>{item.comments}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      {item.imageUrl && (
-        <>
-          <Image source={{ uri: item.imageUrl }} style={styles.postImage} />
-          {item.source && (
-            <Text style={styles.sourceText}>Source: {item.source}</Text>
-          )}
-        </>
-      )}
-      <Text style={styles.postContent}>{item.postContent}</Text>
-      <View style={styles.interactionContainer}>
-        <TouchableOpacity
-          style={[
-            styles.interactionButton,
-            likedPosts[item.id] ? styles.likedButton : null
-          ]}
-          onPress={() => toggleLike(item.id)}
-        >
-          <Icon name="heart" size={18} color={likedPosts[item.id] ? "#FFFFFF" : "#4CAF50"} />
-          <Text style={[styles.buttonText, { color: likedPosts[item.id] ? "#FFFFFF" : "#4CAF50" }]}>
-            {item.likes}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.interactionButton}>
-          <Icon name="message-square" size={18} color="#4CAF50" />
-          <Text style={styles.buttonText}>{item.comments}</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -210,7 +220,7 @@ const IndexPage: React.FC = () => {
       </View>
       <View style={styles.contentContainer}>
         <FlatList
-          data={posts}
+          data={[...posts, dummyPost1, dummyPost2]}
           renderItem={renderPost}
           keyExtractor={(item) => item.id}
         />
@@ -218,6 +228,32 @@ const IndexPage: React.FC = () => {
     </View>
   );
 };
+
+// Dummy posts to be added below actual posts
+const dummyPost1: Post = {
+  id: 'dummy1',
+  userName: 'Twesige Trejan',
+  userProfileImage: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
+  postContent: 'New techniques in irrigation are changing the game.',
+  imageUrl: require('../../assets/images/coffee.jpg'),
+  likes: 3,
+  comments: 0,
+  source: 'Agri Journal',
+};
+
+const dummyPost2: Post = {
+  id: 'dummy2',
+  userName: 'Haven Ella',
+  userProfileImage: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
+  postContent: 'Just harvested my first crop of the season!.',
+  imageUrl: require('../../assets/images/irri.jpg'),
+  likes: 10,
+  comments: 0,
+  source: ' Personal Farm',
+};
+
+
+
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -337,4 +373,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default IndexPage;
+export default PostPage;

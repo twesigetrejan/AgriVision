@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ListRenderItem, Alert } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ListRenderItem } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native'; 
@@ -10,7 +10,7 @@ interface Post {
     id: string;
     userName: string;
     postContent: string;
-    imageUrl?: string;
+    imageUrl?: any; 
     likes: number;
     comments: number;
     source?: string;
@@ -24,12 +24,36 @@ const IndexPage: React.FC = () => {
     const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
     const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
 
+    // Dummy posts
+    const dummyPosts: Post[] = [
+        {
+            id: 'dummy1',
+            userName: 'Twesige Trejan',
+            postContent: 'New techniques in irrigation are changing the game.',
+            imageUrl: require('../../assets/images/irri.jpg'),
+            likes: 3,
+            comments: 0,
+            source: 'Agri Journal',
+        },
+        {
+            id: 'dummy2',
+            userName: 'Haven Ella',
+            postContent: 'Just harvested my first crop of the season!.',
+            imageUrl: require('../../assets/images/coffee.jpg'),
+            likes: 10,
+            comments: 0,
+            source: 'Personal Farm',
+        }
+    ];
+
     useEffect(() => {
         const loadPosts = async () => {
             try {
                 const storedPosts = await AsyncStorage.getItem('posts');
                 if (storedPosts) {
                     setPosts(JSON.parse(storedPosts));
+                } else {
+                    console.log('No posts found in AsyncStorage');
                 }
             } catch (error) {
                 console.error('Failed to load posts:', error);
@@ -80,6 +104,8 @@ const IndexPage: React.FC = () => {
                     const storedPosts = await AsyncStorage.getItem('posts');
                     if (storedPosts) {
                         setPosts(JSON.parse(storedPosts));
+                    } else {
+                        console.log('No posts found in AsyncStorage');
                     }
                 } catch (error) {
                     console.error('Failed to load posts:', error);
@@ -131,7 +157,7 @@ const IndexPage: React.FC = () => {
 
             {item.imageUrl && (
                 <>
-                    <Image source={{ uri: item.imageUrl }} style={styles.postImage} />
+                    <Image source={item.imageUrl} style={styles.postImage} />
                     <Text style={styles.postContent}>{item.postContent}</Text>
                     <Text style={styles.sourceText}>Source: {item.source}</Text>
                 </>
@@ -176,7 +202,7 @@ const IndexPage: React.FC = () => {
             </View>
             <View style={styles.postCreationContainer}>
                 <FlatList
-                    data={posts}
+                    data={[...posts, ...dummyPosts]} 
                     renderItem={renderPost}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.flatListContent}
@@ -214,23 +240,20 @@ const styles = StyleSheet.create({
     },
     loginButtonPressed: {},
     loginText: {
-        color: '#ffffff',
         fontSize: 14,
+        fontWeight: '600',
+        color: '#ffffff',
         marginLeft: 5,
     },
-    postCreationContainer: {
-        flex: 1,
-    },
-    flatListContent: {
-        padding: 10,
-    },
     postCard: {
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        marginBottom: 10,
         backgroundColor: '#ffffff',
-        elevation: 2,
+        marginBottom: 10,
+        borderRadius: 8,
+        padding: 10,
+        shadowColor: '#000000',
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
     },
     postHeader: {
         flexDirection: 'row',
@@ -238,32 +261,28 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     profileImage: {
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
         borderRadius: 20,
         marginRight: 10,
     },
     userName: {
         fontSize: 14,
-        fontWeight: 'semibold',
-        color: '#888888',
-    },
-    postContent: {
-        fontSize: 13,
-        color: '#000',
-        marginBottom: 10,
+        fontWeight: '600',
     },
     postImage: {
         width: '100%',
-        height: 150,
-        borderRadius: 10,
-        marginBottom: 5,
+        height: 200,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    postContent: {
+        fontSize: 14,
+        marginBottom: 10,
     },
     sourceText: {
         fontSize: 12,
-        color: '#888888',
-        marginBottom: 5,
-        textAlign: 'right',
+        color: '#757575',
     },
     interactionContainer: {
         flexDirection: 'row',
@@ -272,18 +291,22 @@ const styles = StyleSheet.create({
     interactionButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 20,
-        marginRight: 10,
     },
     likedButton: {
         backgroundColor: '#4CAF50',
+        borderRadius: 20,
+        paddingHorizontal: 10,
     },
     buttonText: {
+        fontSize: 14,
+        fontWeight: '600',
         marginLeft: 5,
-        fontSize: 10,
+    },
+    flatListContent: {
+        paddingHorizontal: 10,
+    },
+    postCreationContainer: {
+        flex: 1,
     },
 });
 
