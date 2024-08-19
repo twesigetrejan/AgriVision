@@ -90,8 +90,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     marginTop: 50,
-    color: '#4CAF50',
+    color: 'black',
     fontWeight: 'bold',
+
   },
   postCard: {
     borderRadius: 10,

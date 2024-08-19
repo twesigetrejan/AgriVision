@@ -17,6 +17,7 @@ interface Post {
   comments: number;
   source?: string;
 }
+
 const PostPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<{ [key: string]: boolean }>({});
@@ -89,7 +90,8 @@ const PostPage: React.FC = () => {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setSelectedImage(result.assets[0].uri);
+      const selectedImage = result.assets[0].uri;
+      setSelectedImage(selectedImage);
     }
   };
 
@@ -119,6 +121,8 @@ const PostPage: React.FC = () => {
       comments: 0,
     };
 
+    console.log('New Post:', newPost); // Log the new post object
+
     const updatedPosts = [newPost, ...posts];
     setPosts(updatedPosts);
     setNewPostContent('');
@@ -141,12 +145,16 @@ const PostPage: React.FC = () => {
   };
 
   const renderPost: ListRenderItem<Post> = ({ item }) => {
+    console.log('Rendering Post Image URL:', item.imageUrl);  // Log the imageUrl
     const renderImage = () => {
       if (item.imageUrl) {
+        console.log('Rendering Image:', item.imageUrl);  // Log when the image is being rendered
         if (typeof item.imageUrl === 'string' && item.imageUrl.startsWith('http')) {
           return <Image source={{ uri: item.imageUrl }} style={styles.postImage} />;
         } else if (typeof item.imageUrl === 'number') {
           return <Image source={item.imageUrl} style={styles.postImage} />;
+        } else {
+          return <Image source={{ uri: item.imageUrl }} style={styles.postImage} />;
         }
       }
       return null;
@@ -235,7 +243,7 @@ const dummyPost1: Post = {
   userName: 'Twesige Trejan',
   userProfileImage: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
   postContent: 'New techniques in irrigation are changing the game.',
-  imageUrl: require('../../assets/images/coffee.jpg'),
+  imageUrl: require('../../assets/images/irri.jpg'),
   likes: 3,
   comments: 0,
   source: 'Agri Journal',
@@ -245,15 +253,12 @@ const dummyPost2: Post = {
   id: 'dummy2',
   userName: 'Haven Ella',
   userProfileImage: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
-  postContent: 'Just harvested my first crop of the season!.',
-  imageUrl: require('../../assets/images/irri.jpg'),
-  likes: 10,
-  comments: 0,
-  source: ' Personal Farm',
+  postContent: 'This season’s best practices for sustainable farming.',
+  imageUrl: require('../../assets/images/coffee.jpg'),
+  likes: 7,
+  comments: 2,
+  source: 'Farmers Weekly',
 };
-
-
-
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -262,67 +267,62 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
     backgroundColor: '#4CAF50',
-    paddingHorizontal: 10,
+    padding: 20,
     paddingTop: 60,
-    paddingVertical: 20,
+
   },
   logo: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  loginText: {
-    color: '#ffffff',
-    fontSize: 14,
-    marginLeft: 5,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   logButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 5,
-    borderRadius: 20,
+    backgroundColor: '#388E3C',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
   },
   loginButtonPressed: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#2E7D32',
+  },
+  loginText: {
+    color: '#FFFFFF',
+    marginLeft: 5,
   },
   postCreation: {
-    marginBottom: 20,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    padding: 10,
   },
   postInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#4CAF50',
+    borderColor: '#888888',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
     marginBottom: 10,
   },
   postInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#333333',
+    paddingHorizontal: 10,
+    color: '#000000',
   },
   imagePickerButton: {
-    marginLeft: 10,
+    padding: 10,
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 10,
+    padding: 10,
   },
   postCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    borderColor: '#4CAF50',
-    borderWidth: 1,
+    elevation: 2,
   },
   postHeader: {
     flexDirection: 'row',
@@ -338,22 +338,18 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
+    color: '#4CAF50',
+  },
+  postContent: {
+    fontSize: 14,
+    color: '#000000',
+    marginBottom: 10,
   },
   postImage: {
     width: '100%',
     height: 200,
     borderRadius: 10,
     marginBottom: 10,
-  },
-  sourceText: {
-    fontSize: 14,
-    color: '#888888',
-    marginBottom: 10,
-  },
-  postContent: {
-    fontSize: 16,
-    color: '#333333',
   },
   interactionContainer: {
     flexDirection: 'row',
@@ -362,14 +358,19 @@ const styles = StyleSheet.create({
   interactionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 5,
   },
   likedButton: {
-    backgroundColor: '#FF4081',
+    backgroundColor: '#4CAF50',
+    padding: 5,
+    borderRadius: 5,
   },
   buttonText: {
-    fontSize: 14,
     marginLeft: 5,
+  },
+  sourceText: {
+    fontSize: 12,
+    color: '#888888',
+    marginBottom: 5,
   },
 });
 

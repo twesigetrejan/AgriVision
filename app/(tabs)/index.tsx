@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ListRenderItem } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native'; 
+import { useFocusEffect } from '@react-navigation/native';
 import { User } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -10,7 +10,7 @@ interface Post {
     id: string;
     userName: string;
     postContent: string;
-    imageUrl?: any; 
+    imageUrl?: any; // This can be a local require or a remote URL
     likes: number;
     comments: number;
     source?: string;
@@ -30,7 +30,7 @@ const IndexPage: React.FC = () => {
             id: 'dummy1',
             userName: 'Twesige Trejan',
             postContent: 'New techniques in irrigation are changing the game.',
-            imageUrl: require('../../assets/images/irri.jpg'),
+            imageUrl: require('../../assets/images/irri.jpg'), // Local image
             likes: 3,
             comments: 0,
             source: 'Agri Journal',
@@ -39,7 +39,7 @@ const IndexPage: React.FC = () => {
             id: 'dummy2',
             userName: 'Haven Ella',
             postContent: 'Just harvested my first crop of the season!.',
-            imageUrl: require('../../assets/images/coffee.jpg'),
+            imageUrl: require('../../assets/images/coffee.jpg'), // Local image
             likes: 10,
             comments: 0,
             source: 'Personal Farm',
@@ -156,12 +156,14 @@ const IndexPage: React.FC = () => {
             </View>
 
             {item.imageUrl && (
-                <>
-                    <Image source={item.imageUrl} style={styles.postImage} />
-                    <Text style={styles.postContent}>{item.postContent}</Text>
-                    <Text style={styles.sourceText}>Source: {item.source}</Text>
-                </>
+                <Image
+                    source={typeof item.imageUrl === 'number' ? item.imageUrl : { uri: item.imageUrl }}
+                    style={styles.postImage}
+                />
             )}
+            <Text style={styles.postContent}>{item.postContent}</Text>
+            <Text style={styles.sourceText}>Source: {item.source}</Text>
+
             <View style={styles.interactionContainer}>
                 <TouchableOpacity
                     style={[
@@ -202,7 +204,7 @@ const IndexPage: React.FC = () => {
             </View>
             <View style={styles.postCreationContainer}>
                 <FlatList
-                    data={[...posts, ...dummyPosts]} 
+                    data={[...posts, ...dummyPosts]}
                     renderItem={renderPost}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.flatListContent}

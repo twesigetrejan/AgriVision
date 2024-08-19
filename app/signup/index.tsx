@@ -95,13 +95,14 @@ const SignUpPage: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // Align items towards the top
     padding: 20,
     backgroundColor: '#fff',
+    marginTop: 30, // Add some margin at the top
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: 20,
     left: 20,
     padding: 10,
     zIndex: 1,
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    marginTop: 40, // Push the title down a bit
   },
   imagePickerContainer: {
     alignSelf: 'center',
@@ -140,8 +142,9 @@ const styles = StyleSheet.create({
     borderColor: '#4CAF50',
     borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 15,
+    marginBottom: 20,
     paddingHorizontal: 10,
+    color:'black'
   },
 });
 

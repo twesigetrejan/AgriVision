@@ -23,6 +23,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="explore"
         options={{
@@ -33,5 +34,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+
   );
 }
